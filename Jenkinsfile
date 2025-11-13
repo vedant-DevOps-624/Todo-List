@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "devops-static-site"
+        IMAGE_NAME = "ToDoList"
     }
 
     stages {
@@ -10,13 +10,13 @@ pipeline {
             steps {
                 echo "🔹 CI/CD Pipeline started by Aditya Singh"
                 echo "Cloning the repository (main branch)..."
-                git branch: 'main', url: 'https://github.com/AdityaSingh0472/devops-static-website.git'
+                git branch: 'main', url: 'https://github.com/vedant-DevOps-624/Todo-List.git'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                echo "🔹 Building Docker image for Aditya's static website..."
+                echo "🔹 Building Docker image for vedant's website..."
                 sh "docker build -t ${IMAGE_NAME} ."
             }
         }
