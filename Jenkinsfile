@@ -1,41 +1,35 @@
 pipeline {
-    agent any
-
-    environment {
-        IMAGE_NAME = "ToDoList"
+  agent any
+  stages {
+    stage('Build') {
+      steps {
+        script {
+          if (isUnix()) {
+            // on Linux/macOS agents
+            sh '''
+              echo "Building on Unix"
+              docker build -t vedant/todo-list:latest .
+            '''
+          } else {
+            // on Windows agents
+            bat """
+              echo Building on Windows
+              REM If Docker CLI is available on Windows, build:
+              docker build -t vedant/todo-list:latest .
+            """
+          }
+        }
+      }
     }
 
-    stages {
-        stage('Clone Repository') {
-            steps {
-                echo "🔹 CI/CD Pipeline started by Aditya Singh"
-                echo "Cloning the repository (main branch)..."
-                git branch: 'main', url: 'https://github.com/vedant-DevOps-624/Todo-List.git'
-            }
-        }
-
-        stage('Build Docker Image') {
-            steps {
-                echo "🔹 Building Docker image for vedant's website..."
-                sh "docker build -t ${IMAGE_NAME} ."
-            }
-        }
-
-        stage('Run Container') {
-            steps {
-                echo "🔹 Deploying the latest version of the website..."
-                sh 'docker stop devops-container || true && docker rm devops-container || true'
-                sh "docker run -d --name devops-container -p 8080:80 ${IMAGE_NAME}"
-            }
-        }
+    stage('Run container') {
+      when { expression { isUnix() } } // optional: only run on Unix agents if you expect docker there
+      steps {
+        sh 'docker run --rm -d -p 8080:80 vedant/todo-list:latest'
+      }
     }
-
-    post {
-        success {
-            echo "✅ Build and deployment successful!"
-        }
-        failure {
-            echo "❌ Build or deployment failed — please check logs."
-        }
-    }
+  }
+  post {
+    failure { echo 'Build or deployment failed — check logs.' }
+  }
 }
